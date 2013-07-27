@@ -114,6 +114,7 @@ let open_hs name =
         ~tab_label:(GMisc.label
             ~text:(Filename.basename name) ())#coerce
         c#getPane#coerce;
+    ignore(0);
 in
 
 let open_file action = 
