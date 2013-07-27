@@ -1,0 +1,10 @@
+To compile and install, type
+
+./configure
+make
+make install
+
+If you wish to change the location of the install, simply set the environment
+variable PREFIX before calling configure:
+
+PREFIX=/usr ./configure

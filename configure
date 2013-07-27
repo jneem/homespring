@@ -1,0 +1,117 @@
+#!/bin/sh
+
+if [ "${PREFIX}x"  == "x" ]; then
+	PREFIX=/usr/local
+fi
+DATADIR="${PREFIX}/share/homespring"
+BINDIR="${PREFIX}/bin"
+
+echo -n "Checking for Objective Caml..."
+
+if [ "${OCAMLC}x" == "x" ]; then
+	if which ocamlopt > /dev/null 2>&1 ; then
+		OCAMLC=`which ocamlopt`
+	else
+		echo "no"
+		echo \
+		"Couldn't find ocamlopt. You might need to install an OCaml \
+		compiler. You can point me to an OCaml compiler by setting the \
+		environment variable OCAMLC."
+		exit 1
+	fi
+fi
+
+if [ "${OCAMLDEP}x" == "x" ]; then
+	if which ocamldep > /dev/null 2>&1 ; then
+		OCAMLDEP=`which ocamldep`
+	else
+		echo "no"
+		echo \
+		"Couldn't find ocamldep. You might need to install an OCaml compiler. \
+		You can point me to ocamldep by setting the environment \
+		variable OCAMLDEP."
+		exit 1
+	fi
+fi
+
+if [ "${LIBS}x" == "x" ]; then
+	if locate unix.cmxa str.cmxa > /dev/null 2>&1 ; then
+		LIBS="unix.cmxa str.cmxa"
+	else
+		echo "no"
+		echo \
+		"Couldn't find required libs unix.cmxa and str.cmxa. Your ocaml \
+		installation may not be complete. You can specify the LIBS environment \
+		variable to override this check."
+		exit 1
+	fi
+fi
+
+echo "yes"
+echo -n "Checking for lablgtk2..."
+
+if [ "${GTKLIBS}x" == "x" ]; then
+	if ! locate lablgtk.cmxa gtkInit.cmx > /dev/null 2>&1 ; then
+		echo "no"
+		echo \
+		"Couldn't find required libs lablgtk.cmxa and gtkInit.cmx. You might \
+		need to install lablgtk. You can override this check by specifying \
+		the GTKLIBS environment variable."
+		exit 1
+	elif ! locate lablrsvg.cmxa > /dev/null 2>&1 ; then
+		echo "no"
+		echo \
+		"Couldn't find lablrsvg.cmxa. You need to install lablgtk with svg \
+		support. You can override this check by specifying \
+		the GTKLIBS environment variable."
+		exit 1
+	elif ! locate lablgnomecanvas.cmxa > /dev/null 2>&1 ; then
+		echo "no"
+		echo \
+		"Couldn't find lablgnomecanvas.cmxa. You need to install lablgtk with \
+		GnomeCanvas support. You can override this check by specifying \
+		the GTKLIBS environment variable."
+		exit 1
+	else
+		GTKLIBS="lablgtk.cmxa lablgnomecanvas.cmxa lablrsvg.cmxa gtkInit.cmx"
+	fi
+fi
+
+if [ "${OCAMLFLAGS}x" == "x" ]; then
+	OCAMLFLAGS="-I +lablgtk2"
+fi
+
+echo "yes"
+
+echo -n "checking for pdflatex..."
+if which pdflatex > /dev/null 2>&1 ; then
+	LATEX=`which pdflatex`
+	echo "yes"
+else 
+	echo "no, not building docs"
+fi
+
+echo "creating Makefile"
+if [ "${LATEX}x" == "x" ]; then
+	grep -v doc Makefile.in > Makefile
+else
+	cp Makefile.in Makefile
+fi
+
+echo "creating doc/Makefile"
+sed -e "s&@LATEX@&${LATEX}&g" \
+	doc/Makefile.in > doc/Makefile
+
+echo "creating src/Makefile"
+sed -e "s&@LIBS@&${LIBS}&g" \
+	-e "s&@GTKLIBS@&${GTKLIBS}&g" \
+	-e "s&@OCAMLC@&${OCAMLC}&g" \
+	-e "s&@OCAMLFLAGS@&${OCAMLFLAGS}&g" \
+	-e "s&@OCAMLDEP@&${OCAMLDEP}&g" \
+	-e "s&@DATADIR@&${DATADIR}&g" \
+	-e "s&@BINDIR@&${BINDIR}&g" \
+	src/Makefile.in > src/Makefile
+
+echo "creating data/Makefile"
+sed -e "s&@DATADIR@&${DATADIR}&g" \
+	data/Makefile.in > data/Makefile

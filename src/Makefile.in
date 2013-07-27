@@ -1,0 +1,61 @@
+LIBS_OPT=@LIBS@
+GTKLIBS_OPT=@GTKLIBS@
+OCAMLOPT=@OCAMLC@
+OCAMLOPTFLAGS=@OCAMLFLAGS@
+OCAMLDEP=@OCAMLDEP@
+BINDIR=@BINDIR@
+DATADIR=@DATADIR@
+
+# For bytecode builds
+OCAMLC=ocamlc
+LIBS=unix.cma str.cma
+GTKLIBS=lablgtk.cma lablgnomecanvas.cma lablrsvg.cma gtkInit.cmo
+OCAMLCFLAGS=-I +lablgtk2
+
+all: hsrun hsgui
+opt: hsrun_opt hsgui_opt
+install: hsrun_opt hsgui_opt
+	install -d $(BINDIR)
+	sed -e "s&@DATAD@&$(DATADIR)&g" \
+		-e "s&@BIND@&$(BINDIR)&g" \
+		hsgui.sh.in > hsgui.sh
+	install hsgui.sh $(BINDIR)/hsgui
+	install -s hsrun_opt $(BINDIR)/hsrun
+	install -s hsgui_opt $(BINDIR)/hsgui-bin
+
+HSRUN_OBJS=homespring.cmo hsrun.cmo
+HSRUN_OBJS_OPT=homespring.cmx hsrun.cmx
+
+HSGUI_OBJS=homespring.cmo hscanvas.cmo hsgui.cmo
+HSGUI_OBJS_OPT=homespring.cmx hscanvas.cmx hsgui.cmx
+
+hsrun: $(HSRUN_OBJS)
+	$(OCAMLC) $(OCAMLCFLAGS) -o hsrun $(LIBS) $(HSRUN_OBJS)
+
+hsrun_opt: $(HSRUN_OBJS_OPT)
+	$(OCAMLOPT) $(OCAMLOPTFLAGS) -o hsrun_opt $(LIBS_OPT) $(HSRUN_OBJS_OPT)
+
+hsgui: $(HSGUI_OBJS)
+	$(OCAMLC) $(OCAMLCFLAGS) -o hsgui $(LIBS) $(GTKLIBS) $(HSGUI_OBJS)
+
+hsgui_opt: $(HSGUI_OBJS_OPT)
+	$(OCAMLOPT) $(OCAMLOPTFLAGS) -o hsgui_opt $(LIBS_OPT) $(GTKLIBS_OPT) $(HSGUI_OBJS_OPT)
+
+clean:
+	rm -f hsrun hsgui hsrun_opt hsgui_opt *.cmo *.cma *.cmi *.cmx *.o
+
+.SUFFIXES: .ml .mli .cmo .cmi .cmx
+
+.ml.cmo:
+	$(OCAMLC) $(OCAMLCFLAGS) -c $<
+
+.mli.cmi:
+	$(OCAMLC) $(OCAMLCFLAGS) -c $<
+
+.ml.cmx:
+	$(OCAMLOPT) $(OCAMLOPTFLAGS) -c $<
+
+.depend:
+	$(OCAMLDEP) *.mli *.ml > .depend
+
+include .depend

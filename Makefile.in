@@ -1,0 +1,14 @@
+all:
+	make -C src opt
+	make -C doc
+	make -C data
+
+clean:
+	make -C src clean
+	make -C doc clean
+	make -C data clean
+
+install:
+	make -C src install
+	make -C doc install
+	make -C data install

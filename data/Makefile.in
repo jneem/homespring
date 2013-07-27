@@ -1,0 +1,7 @@
+DATADIR=@DATADIR@
+
+all:
+clean:
+install:
+	install -d $(DATADIR)
+	install *.svg $(DATADIR)
