@@ -1,10 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ "${PREFIX}x"  == "x" ]; then
 	PREFIX=/usr/local
 fi
 DATADIR="${PREFIX}/share/homespring"
 BINDIR="${PREFIX}/bin"
+
 
 echo -n "Checking for Objective Caml..."
 
@@ -34,8 +35,19 @@ if [ "${OCAMLDEP}x" == "x" ]; then
 	fi
 fi
 
+ocamlibpath=$(ocamlc -where)
+
+function checklibs(){
+  for l in "$@"; do
+    count=$(find $ocamlibpath -name $l | wc -l)
+    if [ $count -eq 0 ]; then return 1; fi
+  done
+  return 0
+}
+
+
 if [ "${LIBS}x" == "x" ]; then
-	if locate unix.cmxa str.cmxa > /dev/null 2>&1 ; then
+	if checklibs unix.cmxa str.cmxa > /dev/null 2>&1 ; then
 		LIBS="unix.cmxa str.cmxa"
 	else
 		echo "no"
@@ -51,21 +63,21 @@ echo "yes"
 echo -n "Checking for lablgtk2..."
 
 if [ "${GTKLIBS}x" == "x" ]; then
-	if ! locate lablgtk.cmxa gtkInit.cmx > /dev/null 2>&1 ; then
+	if ! checklibs lablgtk.cmxa gtkInit.cmx > /dev/null 2>&1 ; then
 		echo "no"
 		echo \
 		"Couldn't find required libs lablgtk.cmxa and gtkInit.cmx. You might \
 		need to install lablgtk. You can override this check by specifying \
 		the GTKLIBS environment variable."
 		exit 1
-	elif ! locate lablrsvg.cmxa > /dev/null 2>&1 ; then
+	elif ! checklibs lablrsvg.cmxa > /dev/null 2>&1 ; then
 		echo "no"
 		echo \
 		"Couldn't find lablrsvg.cmxa. You need to install lablgtk with svg \
 		support. You can override this check by specifying \
 		the GTKLIBS environment variable."
 		exit 1
-	elif ! locate lablgnomecanvas.cmxa > /dev/null 2>&1 ; then
+	elif ! checklibs lablgnomecanvas.cmxa > /dev/null 2>&1 ; then
 		echo "no"
 		echo \
 		"Couldn't find lablgnomecanvas.cmxa. You need to install lablgtk with \

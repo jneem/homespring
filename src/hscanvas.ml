@@ -291,7 +291,6 @@ class canvas (file : string) =
       | None -> ());
         run_id <- None;
     method isRunning = match run_id with Some i -> true | None -> false
-    method isFinished = root#isFinished
     method reset =
         root#reset;
         gui_root#update;
