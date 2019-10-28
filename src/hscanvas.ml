@@ -124,7 +124,12 @@ class gui_node group (canvas : GnoCanvas.canvas) (hs_node : node) =
         let size = zoom *. 16.0 in
         let point_size = zoom *. 12.0 in
         let pic = int_of_float size in
-		let datadir = try Sys.getenv "DATADIR" with Not_found -> "." in
+        let datadir = 
+                try Sys.getenv "DATADIR" with Not_found -> 
+                        (if (Sys.file_exists("snow_on.svg")) then "."
+                         else if (Sys.file_exists("data/snow_on.svg")) then "data"
+                         else raise (Failure "data dir not found (set DATADIR env to directory containing e.g. snow_on.svg)"))
+        in
 
         s_pic <- ( (render pic pic (datadir^"/snow_on.svg")),
                    (render pic pic (datadir^"/snow_off.svg")));
