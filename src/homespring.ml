@@ -580,7 +580,7 @@ and young_range_switch name parent io =
 end
 
 let make_node name =
-    match (String.lowercase name) with
+    match (String.lowercase_ascii name) with
         "hatchery" -> new hatchery name
       | "hydro power" -> new hydro_power name
       | "snowmelt" -> new snowmelt name
@@ -633,8 +633,7 @@ let make_node name =
 (* return a list of all the tokens in the file *)
 let parse_file filename =
     let ch = open_in filename in
-    let s = String.make (in_channel_length ch) ' ' in
-    really_input ch s 0 (in_channel_length ch);
+    let s = really_input_string ch (in_channel_length ch) in
     let r = Str.regexp "\\(\\. \\| \\.\\|[^ \n\\.]\\)*\\.?[ \n]" in
     let newline = Str.regexp ".*\\.\n" in
     let read_token pos =
