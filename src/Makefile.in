@@ -12,16 +12,26 @@ LIBS=unix.cma str.cma
 GTKLIBS=lablgtk.cma lablgnomecanvas.cma lablrsvg.cma gtkInit.cmo
 OCAMLCFLAGS=-I +lablgtk2
 
-all: hsrun hsgui
-opt: hsrun_opt hsgui_opt
-install: hsrun_opt hsgui_opt
+all: hsrun
+opt: hsrun_opt
+ifdef GTKLIBS_OPT
+all: hsgui
+opt: hsgui_opt
+endif
+
+install: hsrun_opt
+	install -d $(BINDIR)
+	install -s hsrun_opt $(BINDIR)/hsrun
+ifdef GTKLIBS_OPT
+install: install-hsgui
+install-hsgui: hsgui_opt
 	install -d $(BINDIR)
 	sed -e "s&@DATAD@&$(DATADIR)&g" \
 		-e "s&@BIND@&$(BINDIR)&g" \
 		hsgui.sh.in > hsgui.sh
 	install hsgui.sh $(BINDIR)/hsgui
-	install -s hsrun_opt $(BINDIR)/hsrun
 	install -s hsgui_opt $(BINDIR)/hsgui-bin
+endif
 
 HSRUN_OBJS=homespring.cmo hsrun.cmo
 HSRUN_OBJS_OPT=homespring.cmx hsrun.cmx
