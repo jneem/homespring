@@ -68,32 +68,31 @@ if [ "${GTKLIBS}x" == "x" ]; then
 		echo \
 		"Couldn't find required libs lablgtk.cmxa and gtkInit.cmx. You might \
 		need to install lablgtk. You can override this check by specifying \
-		the GTKLIBS environment variable."
-		exit 1
+		the GTKLIBS environment variable. Not building hsgui."
 	elif ! checklibs lablrsvg.cmxa > /dev/null 2>&1 ; then
 		echo "no"
 		echo \
 		"Couldn't find lablrsvg.cmxa. You need to install lablgtk with svg \
 		support. You can override this check by specifying \
-		the GTKLIBS environment variable."
-		exit 1
+		the GTKLIBS environment variable. Not building hsgui."
 	elif ! checklibs lablgnomecanvas.cmxa > /dev/null 2>&1 ; then
 		echo "no"
 		echo \
 		"Couldn't find lablgnomecanvas.cmxa. You need to install lablgtk with \
 		GnomeCanvas support. You can override this check by specifying \
-		the GTKLIBS environment variable."
-		exit 1
+		the GTKLIBS environment variable. Not building hsgui."
 	else
 		GTKLIBS="lablgtk.cmxa lablgnomecanvas.cmxa lablrsvg.cmxa gtkInit.cmx"
 	fi
 fi
 
-if [ "${OCAMLFLAGS}x" == "x" ]; then
-	OCAMLFLAGS="-I +lablgtk2"
-fi
 
-echo "yes"
+if [ "${GTKLIBS}x" != "x" ]; then
+	if [ "${OCAMLFLAGS}x" == "x" ]; then
+		OCAMLFLAGS="-I +lablgtk2"
+	fi
+	echo "yes"
+fi
 
 echo -n "checking for pdflatex..."
 if which pdflatex > /dev/null 2>&1 ; then
