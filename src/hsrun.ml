@@ -24,7 +24,7 @@ else
             n#fishTick;
             n#miscTick;
             n#inputTick;
-            flush Pervasives.stdout;
+            flush stdout;
         done
     in
     match build_tree Sys.argv.(1) (new io) with
